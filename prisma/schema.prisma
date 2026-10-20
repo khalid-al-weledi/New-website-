@@ -273,4 +273,4 @@ model AuditLog {
   metadata  Json?
   createdAt DateTime @default(now())
   actor     User? @relation("Actor", fields: [actorId], references: [id])
-}
+} 
