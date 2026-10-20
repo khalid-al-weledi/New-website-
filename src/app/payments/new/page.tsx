@@ -9,13 +9,8 @@ export default async function NewPaymentPage({ searchParams }: { searchParams: {
     return <div className="p-8 text-center text-red-600 font-bold">لم يتم تحديد باقة. <Link href="/packages" className="underline">اختر باقة أولاً</Link></div>;
   }
 
-  const paymentSettings = await prisma.paymentSetting.findMany({
-    where: { isActive: true }
-  });
-
-  const pkg = await prisma.package.findUnique({
-    where: { id: packageId }
-  });
+  const paymentSettings = await prisma.paymentSetting.findMany({ where: { isActive: true } });
+  const pkg = await prisma.package.findUnique({ where: { id: packageId } });
 
   if (!pkg) {
     return <div className="p-8 text-center text-red-600 font-bold">الباقة غير موجودة. <Link href="/packages" className="underline">اختر باقة أخرى</Link></div>;
