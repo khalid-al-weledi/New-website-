@@ -1,29 +1,21 @@
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import RegistrationForm from '@/components/RegistrationForm';
-import { prisma } from '@/lib/prisma';
-
-export const dynamic = 'force-dynamic';
+import { prisma } from "@/lib/prisma";
+import RegistrationForm from "@/components/RegistrationForm";
 
 export default async function RegisterPage() {
   const programs = await prisma.program.findMany({
     where: { isActive: true },
-    orderBy: { sortOrder: 'asc' },
     select: { id: true, title: true },
   });
+
   return (
-    <>
-      <Header />
-      <main className="mx-auto max-w-4xl px-4 py-10">
-        <h1 className="text-2xl font-bold text-royal-800">استمارة التسجيل</h1>
-        <p className="mt-2 text-royal-600 text-sm">
-          املأ البيانات بدقة، وسيراجع المشرف طلبك ويتواصل معك.
-        </p>
-        <div className="mt-6">
-          <RegistrationForm programs={programs} />
+    <main className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-blue-900 mb-2">استمارة التسجيل</h1>
+          <p className="text-gray-600">املأ البيانات بدقة، وسيراجع المشرف طلبك ويتواصل معك.</p>
         </div>
-      </main>
-      <Footer />
-    </>
+        <RegistrationForm programs={programs} />
+      </div>
+    </main>
   );
 }
