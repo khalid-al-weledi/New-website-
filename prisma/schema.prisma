@@ -1,4 +1,6 @@
-generator client { provider = "prisma-client-js" }
+generator client {
+  provider = "prisma-client-js"
+}
 
 datasource db {
   provider  = "postgresql"
@@ -6,13 +8,55 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum Role { SUPER_ADMIN ADMIN ACCOUNTANT ACADEMIC_SUPERVISOR TEACHER STUDENT }
-enum Gender { MALE FEMALE }
-enum RegistrationStatus { DRAFT PENDING APPROVED REJECTED AWAITING_INFORMATION CANCELLED }
-enum PaymentStatus { PENDING APPROVED REJECTED }
-enum PaymentMethod { CBE BOA TELEBIRR MPESA }
-enum BalanceTxType { GIFT PAYMENT_CREDIT USAGE ADJUSTMENT REVERSAL }
-enum VideoStatus { DRAFT PUBLISHED ARCHIVED }
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  ACCOUNTANT
+  ACADEMIC_SUPERVISOR
+  TEACHER
+  STUDENT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum RegistrationStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  AWAITING_INFORMATION
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PaymentMethod {
+  CBE
+  BOA
+  TELEBIRR
+  MPESA
+}
+
+enum BalanceTxType {
+  GIFT
+  PAYMENT_CREDIT
+  USAGE
+  ADJUSTMENT
+  REVERSAL
+}
+
+enum VideoStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
 
 model User {
   id           String   @id @default(cuid())
@@ -24,9 +68,8 @@ model User {
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
-  student    Student?
-  auditLogs  AuditLog[] @relation("Actor")
+  student      Student?
+  auditLogs    AuditLog[] @relation("Actor")
 }
 
 model Student {
@@ -39,14 +82,13 @@ model Student {
   groupId        String?
   giftClaimedAt  DateTime?
   createdAt      DateTime @default(now())
-
-  user         User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  program      Program? @relation(fields: [programId], references: [id])
-  teacher      Teacher? @relation(fields: [teacherId], references: [id])
-  group        Group?   @relation(fields: [groupId], references: [id])
-  payments     Payment[]
-  balanceTxs   BalanceTransaction[]
-  registration RegistrationRequest?
+  user           User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program        Program? @relation(fields: [programId], references: [id])
+  teacher        Teacher? @relation(fields: [teacherId], references: [id])
+  group          Group?   @relation(fields: [groupId], references: [id])
+  payments       Payment[]
+  balanceTxs     BalanceTransaction[]
+  registration   RegistrationRequest?
 }
 
 model RegistrationRequest {
@@ -84,12 +126,8 @@ model RegistrationRequest {
   studentId             String? @unique
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
-
   program Program? @relation(fields: [programId], references: [id])
   student Student? @relation(fields: [studentId], references: [id])
-
-  @@index([status])
-  @@index([phone])
 }
 
 model Program {
@@ -165,12 +203,9 @@ model Payment {
   reviewedAt      DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-
   student   Student  @relation(fields: [studentId], references: [id])
   package   Package  @relation(fields: [packageId], references: [id])
   balanceTx BalanceTransaction?
-
-  @@index([status])
 }
 
 model BalanceTransaction {
@@ -185,11 +220,8 @@ model BalanceTransaction {
   createdById    String?
   idempotencyKey String @unique
   createdAt      DateTime @default(now())
-
   student Student  @relation(fields: [studentId], references: [id])
   payment Payment? @relation(fields: [paymentId], references: [id])
-
-  @@index([studentId, createdAt])
 }
 
 model Video {
@@ -206,7 +238,6 @@ model Video {
   views        Int @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  @@index([status])
 }
 
 model FAQ {
@@ -242,5 +273,4 @@ model AuditLog {
   metadata  Json?
   createdAt DateTime @default(now())
   actor     User? @relation("Actor", fields: [actorId], references: [id])
-  @@index([createdAt])
 }
