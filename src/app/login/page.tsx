@@ -1,58 +1,50 @@
-'use client';
-import { signIn } from 'next-auth/react';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+"use client";
+import { useState } from "react";
+import Link from "next/link";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  async function onSubmit(e: React.FormEvent) {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
-    const res = await signIn('credentials', { identifier, password, redirect: false });
-    setLoading(false);
-    if (!res || res.error) {
-      setError('بيانات الدخول غير صحيحة');
-      return;
-    }
-    router.push('/');
-    router.refresh();
-  }
+    alert("جاري تجهيز نظام تسجيل الدخول...");
+  };
 
   return (
-    <main className="flex flex-1 items-center justify-center bg-royal-50 p-4">
-      <form onSubmit={onSubmit} className="card w-full max-w-md space-y-4">
+    <main className="min-h-screen flex items-center justify-center bg-blue-50 p-4">
+      <form onSubmit={handleLogin} className="card w-full max-w-md space-y-4">
         <div className="text-center">
-          <h1 className="text-xl font-bold text-royal-800">دخول الحساب</h1>
-          <p className="mt-1 text-sm text-royal-600">مقرأة الإمام الجزري</p>
+          <h1 className="text-2xl font-bold text-blue-900 mb-2">دخول الحساب</h1>
+          <p className="text-sm text-gray-500">مقرأة الإمام الجزري</p>
         </div>
-        {error && <div className="rounded-xl bg-red-50 p-3 text-red-800 text-sm">{error}</div>}
+
         <div>
-          <label className="label">البريد أو الهاتف</label>
-          <input
-            value={identifier} onChange={(e) => setIdentifier(e.target.value)}
-            required className="input"
+          <label className="block text-sm font-medium text-blue-900 mb-1">البريد الإلكتروني</label>
+          <input 
+            type="email" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-xl border border-blue-200 px-4 py-2 focus:border-yellow-500 focus:outline-none" 
+            required
           />
         </div>
+
         <div>
-          <label className="label">كلمة المرور</label>
-          <input
-            type="password" value={password}
+          <label className="block text-sm font-medium text-blue-900 mb-1">كلمة المرور</label>
+          <input 
+            type="password" 
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required className="input"
+            className="w-full rounded-xl border border-blue-200 px-4 py-2 focus:border-yellow-500 focus:outline-none" 
+            required
           />
         </div>
-        <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-60">
-          {loading ? 'جارٍ الدخول...' : 'دخول'}
-        </button>
-        <p className="text-center text-sm text-royal-600">
-          <Link href="/" className="hover:text-gold-600">العودة للرئيسية</Link>
+
+        <button type="submit" className="btn-primary w-full">دخول</button>
+        
+        <p className="text-center text-sm text-blue-900 mt-4">
+          <Link href="/" className="hover:text-yellow-600">العودة للرئيسية</Link>
         </p>
       </form>
     </main>
