@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fffef7;
+  --foreground: #0f1e47;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-cairo), system-ui, sans-serif;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl bg-royal-700 px-5 py-2.5 text-white font-semibold hover:bg-royal-800 transition;
+  }
+  .btn-gold {
+    @apply inline-flex items-center justify-center rounded-xl bg-gold-500 px-5 py-2.5 text-royal-900 font-semibold hover:bg-gold-600 transition;
+  }
+  .card {
+    @apply rounded-2xl border border-royal-100 bg-white p-6 shadow-sm;
+  }
+  .input {
+    @apply w-full rounded-xl border border-royal-100 bg-white px-4 py-2.5 text-royal-900 focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-300;
+  }
+  .label {
+    @apply block text-sm font-medium text-royal-800 mb-1.5;
+  }
+}
