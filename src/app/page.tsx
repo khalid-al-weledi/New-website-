@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  // جلب البرامج من قاعدة البيانات
   const programs = await prisma.program.findMany({ where: { isActive: true }, take: 4 });
 
   return (
@@ -34,7 +33,6 @@ export default async function Home() {
 
       {/* 2. القسم الرئيسي (Hero) */}
       <section className="relative bg-[#0a1530] text-white overflow-hidden">
-        {/* الخلفية */}
         <div className="absolute inset-0">
           <img src="/images/building.jpg" alt="Building" className="w-full h-full object-cover opacity-30" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a1530] via-[#0a1530]/80 to-transparent"></div>
