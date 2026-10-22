@@ -6,13 +6,16 @@ export const dynamic = 'force-dynamic';
 export default async function Home() {
   const programs = await prisma.program.findMany({ where: { isActive: true }, take: 4 });
 
+  // اسم اللوجو الطويل مع تحويل المسافات لـ %20 عشان المتصفح يقراه
+  const logoPath = "/image/Circular%20Logo%20for%20Al-Imam%20Al-Jazari.png";
+
   return (
     <main className="flex-1">
       {/* 1. القائمة العلوية */}
       <header className="sticky top-0 z-50 border-b border-blue-900/20 bg-[#0a1530]/95 backdrop-blur text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-            <img src="/images/logo.png" alt="Logo" className="h-12 w-12 object-contain" />
+            <img src={logoPath} alt="Logo" className="h-12 w-12 object-contain" />
             <div className="leading-tight">
               <div className="text-sm md:text-base font-bold text-yellow-500">مقرأة الإمام الجزري</div>
               <div className="text-[10px] md:text-xs text-gray-300">للإقراء والإجازة بالسند</div>
@@ -34,13 +37,13 @@ export default async function Home() {
       {/* 2. القسم الرئيسي (Hero) */}
       <section className="relative bg-[#0a1530] text-white overflow-hidden">
         <div className="absolute inset-0">
-          <img src="/images/building.jpg" alt="Building" className="w-full h-full object-cover opacity-30" />
+          <img src="/image/center-building.jpg" alt="Building" className="w-full h-full object-cover opacity-30" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a1530] via-[#0a1530]/80 to-transparent"></div>
         </div>
 
         <div className="relative mx-auto max-w-7xl px-4 py-24 md:py-32 text-center z-10">
           <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-yellow-500/10 border border-yellow-500/30 shadow-[0_0_30px_rgba(234,179,8,0.2)]">
-            <img src="/images/logo.png" alt="Logo" className="h-16 w-16 object-contain" />
+            <img src={logoPath} alt="Logo" className="h-16 w-16 object-contain" />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">مقرأة الإمام الجزري</h1>
           <p className="text-xl md:text-2xl text-yellow-500 font-medium mb-4">للإقراء والإجازة بالسند</p>
@@ -101,7 +104,7 @@ export default async function Home() {
           </div>
           <div className="relative">
             <div className="absolute inset-0 bg-yellow-500 rounded-3xl transform translate-x-4 translate-y-4"></div>
-            <img src="/images/booklet.jpg" alt="الملازم" className="relative rounded-3xl shadow-lg object-cover w-full h-[400px]" />
+            <img src="/image/booklet.jpg" alt="الملازم" className="relative rounded-3xl shadow-lg object-cover w-full h-[400px]" />
           </div>
         </div>
       </section>
@@ -110,7 +113,7 @@ export default async function Home() {
       <section className="bg-[#0a1530] py-20 text-white">
         <div className="mx-auto max-w-5xl px-4 grid md:grid-cols-3 gap-10 items-center">
           <div className="flex justify-center">
-            <img src="/images/sheikh.jpg" alt="الشيخ" className="w-64 h-64 object-cover rounded-full border-4 border-yellow-500 shadow-xl" />
+            <img src="/image/sheik.jpg" alt="الشيخ" className="w-64 h-64 object-cover rounded-full border-4 border-yellow-500 shadow-xl" />
           </div>
           <div className="md:col-span-2 text-center md:text-right">
             <h2 className="text-3xl font-bold text-yellow-500 mb-2">فضيلة الشيخ</h2>
@@ -155,7 +158,7 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl px-4 grid md:grid-cols-3 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <img src="/images/logo.png" alt="Logo" className="h-10 w-10 object-contain" />
+              <img src={logoPath} alt="Logo" className="h-10 w-10 object-contain" />
               <span className="text-white font-bold">مقرأة الإمام الجزري</span>
             </div>
             <p className="text-sm">للإقراء والإجازة بالسند — عناية بالقرآن وروايته وأدائه.</p>
