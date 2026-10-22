@@ -9,10 +9,9 @@ export function ReviewActions({ requestId, status }: { requestId: string; status
   const handleAction = async (newStatus: 'APPROVED' | 'REJECTED') => {
     let reason = "";
     
-    // لو بيرفض، نطلب منه يكتب السبب
     if (newStatus === 'REJECTED') {
       const input = prompt("يرجى كتابة سبب الرفض (سيظهر للطالب):");
-      if (input === null) return; // لو ضغط Cancel
+      if (input === null) return;
       if (!input.trim()) {
         alert("يجب كتابة سبب الرفض!");
         return;
