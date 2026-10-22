@@ -3,6 +3,8 @@ import { AccessToken } from "livekit-server-sdk";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+export const dynamic = 'force-dynamic'; // السطر ده مهم جداً عشان البناء
+
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -22,11 +24,10 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "إعدادات LiveKit غير مكتملة" }, { status: 500 });
     }
 
-    // إنشاء تذكرة الدخول
     const at = new AccessToken(apiKey, apiSecret, {
       identity: identity,
       name: username,
-      ttl: "2h", // صلاحية التذكرة ساعتين
+      ttl: "2h",
     });
 
     at.addGrant({ roomJoin: true, room: room, canPublish: true, canSubscribe: true });
