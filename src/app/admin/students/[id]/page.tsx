@@ -12,6 +12,7 @@ export default async function StudentDetails({ params }: { params: { id: string 
       user: true,
       program: true,
       group: true,
+      registration: true,
       balanceTxs: { orderBy: { createdAt: "desc" }, take: 5 },
     },
   });
@@ -34,12 +35,16 @@ export default async function StudentDetails({ params }: { params: { id: string 
 
       <div className="grid md:grid-cols-3 gap-6 mb-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 col-span-2">
-          <h2 className="font-bold text-gray-800 border-b pb-2 mb-4">البيانات الأساسية</h2>
+          <h2 className="font-bold text-gray-800 border-b pb-2 mb-4">بيانات الاستمارة</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div><span className="text-gray-500">رقم الطالب:</span> <span className="font-mono bg-gray-100 px-2 py-1 rounded">{student.studentNumber}</span></div>
             <div><span className="text-gray-500">الهاتف:</span> {student.user.phone}</div>
+            <div><span className="text-gray-500">العمر:</span> {student.registration?.age} سنة</div>
+            <div><span className="text-gray-500">البلد/المدينة:</span> {student.registration?.country} - {student.registration?.city}</div>
+            <div><span className="text-gray-500">الفترة المفضلة:</span> {student.registration?.preferredTimeSlots}</div>
+            <div><span className="text-gray-500">الأيام المفضلة:</span> {student.registration?.preferredDays}</div>
             <div><span className="text-gray-500">البرنامج:</span> {student.program?.title || 'غير محدد'}</div>
-            <div><span className="text-gray-500">المجموعة:</span> {student.group?.name || 'غير محدد'}</div>
+            <div><span className="text-gray-500">المجموعة الحالية:</span> <strong className="text-blue-700">{student.group?.name || 'غير محدد'}</strong></div>
             <div><span className="text-gray-500">حالة الحساب:</span> <strong className={student.user.isActive ? "text-green-600" : "text-red-600"}>{student.user.isActive ? "نشط" : "موقوف"}</strong></div>
           </div>
         </div>
@@ -57,6 +62,7 @@ export default async function StudentDetails({ params }: { params: { id: string 
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
+        {/* سجل الحركات المالية */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
           <h2 className="font-bold text-gray-800 border-b pb-2 mb-4">آخر حركات الرصيد</h2>
           <div className="space-y-3">
@@ -68,21 +74,19 @@ export default async function StudentDetails({ params }: { params: { id: string 
                 </strong>
               </div>
             ))}
-            {student.balanceTxs.length === 0 && <p className="text-gray-400">لا توجد حركات.</p>}
           </div>
         </div>
 
+        {/* سجل الملاحظات */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
           <h2 className="font-bold text-gray-800 border-b pb-2 mb-4">سجل الملاحظات والقرارات</h2>
           <div className="space-y-3">
             {auditLogs.map(log => (
               <div key={log.id} className="text-sm bg-gray-50 p-2 rounded">
-                <span className="font-bold block text-blue-800">{log.action === 'ADD_NOTE' ? 'ملاحظة إدارية' : log.action === 'EXPEL_STUDENT' ? 'طرد' : 'تكريم'}</span>
+                <span className="font-bold block text-blue-800">{log.action === 'ADD_NOTE' ? 'ملاحظة' : log.action === 'EXPEL_STUDENT' ? 'طرد' : 'تكريم'}</span>
                 <span className="text-gray-700">{(log.metadata as any)?.note || (log.metadata as any)?.reason}</span>
-                <span className="block text-xs text-gray-400 mt-1">{new Date(log.createdAt).toLocaleDateString('ar-ET')} - بواسطة {log.actor?.fullName}</span>
               </div>
             ))}
-            {auditLogs.length === 0 && <p className="text-gray-400">لا توجد ملاحظات.</p>}
           </div>
         </div>
       </div>
