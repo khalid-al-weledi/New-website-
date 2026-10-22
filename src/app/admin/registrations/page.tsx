@@ -14,6 +14,7 @@ export default async function RegistrationsPage() {
           <Link href="/admin" className="block p-2 hover:bg-blue-900 rounded-lg">الرئيسية</Link>
           <Link href="/admin/registrations" className="block p-2 bg-blue-900 rounded-lg">طلبات التسجيل</Link>
           <Link href="/admin/payments" className="block p-2 hover:bg-blue-900 rounded-lg">المدفوعات</Link>
+          <Link href="/admin/groups" className="block p-2 hover:bg-blue-900 rounded-lg">المجموعات والجداول</Link>
         </nav>
       </aside>
 
@@ -25,7 +26,7 @@ export default async function RegistrationsPage() {
               <thead className="bg-gray-50 border-b border-gray-100 text-gray-500">
                 <tr>
                   <th className="p-4 font-medium">رقم الطلب</th>
-                  <th className="p-4 font-medium">الاسم</th>
+                  <th className="p-4 font-medium">الاسم (اضغط للمراجعة)</th>
                   <th className="p-4 font-medium">الهاتف</th>
                   <th className="p-4 font-medium">الحالة</th>
                 </tr>
@@ -38,13 +39,14 @@ export default async function RegistrationsPage() {
                     <tr key={req.id} className="hover:bg-gray-50/50">
                       <td className="p-4 font-mono text-xs">{req.requestNumber}</td>
                       <td className="p-4 font-medium text-blue-900">
-                        <Link href={`/admin/registrations/${req.id}`} className="hover:underline">
+                        {/* هنا اللينك اللي بيفتح صفحة القبول والرفض */}
+                        <Link href={`/admin/registrations/${req.id}`} className="hover:underline text-blue-600">
                           {req.fullName}
                         </Link>
                       </td>
                       <td className="p-4">{req.phone}</td>
                       <td className="p-4">
-                        <span className={`px-2 py-1 rounded-full text-xs ${req.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : req.status === 'APPROVED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        <span className={`px-2 py-1 rounded-full text-xs ${req.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
                           {req.status}
                         </span>
                       </td>
