@@ -20,7 +20,7 @@ export default async function Home() {
           </div>
           
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-200">
-            <Link href="/" className="text-yellow-500">الرئيسية</Link>
+            <Link href="/" className="text-yellow-500 transition">الرئيسية</Link>
             <Link href="/#programs" className="hover:text-yellow-500 transition">البرامج</Link>
             <Link href="/packages" className="hover:text-yellow-500 transition">الباقات</Link>
             <Link href="/#about" className="hover:text-yellow-500 transition">عن المقرأة</Link>
@@ -57,7 +57,7 @@ export default async function Home() {
             تعليم القرآن الكريم، وتصحيح التلاوة، والتجويد في بيئة تعليمية تجمع بين أصالة الإقراء والتقنيات الحديثة.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/register" className="bg-yellow-500 text-blue-950 px-8 py-3 rounded-xl font-bold text-lg hover:bg-yellow-400 transition flex items-center gap-2">
+            <Link href="/register" className="bg-yellow-500 text-blue-950 px-8 py-3 rounded-xl font-bold text-lg hover:bg-yellow-400 transition flex items-center gap-2 shadow-lg">
               التسجيل في المقرأة
             </Link>
             <Link href="/packages" className="bg-transparent border border-yellow-500 text-yellow-500 px-8 py-3 rounded-xl font-bold text-lg hover:bg-yellow-500 hover:text-blue-950 transition">
