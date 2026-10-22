@@ -9,55 +9,13 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-enum Role {
-  SUPER_ADMIN
-  ADMIN
-  ACCOUNTANT
-  ACADEMIC_SUPERVISOR
-  TEACHER
-  STUDENT
-}
-
-enum Gender {
-  MALE
-  FEMALE
-}
-
-enum RegistrationStatus {
-  DRAFT
-  PENDING
-  APPROVED
-  REJECTED
-  AWAITING_INFORMATION
-  CANCELLED
-}
-
-enum PaymentStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-enum PaymentMethod {
-  CBE
-  BOA
-  TELEBIRR
-  MPESA
-}
-
-enum BalanceTxType {
-  GIFT
-  PAYMENT_CREDIT
-  USAGE
-  ADJUSTMENT
-  REVERSAL
-}
-
-enum VideoStatus {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
-}
+enum Role { SUPER_ADMIN ADMIN ACCOUNTANT ACADEMIC_SUPERVISOR TEACHER STUDENT }
+enum Gender { MALE FEMALE }
+enum RegistrationStatus { DRAFT PENDING APPROVED REJECTED AWAITING_INFORMATION CANCELLED }
+enum PaymentStatus { PENDING APPROVED REJECTED }
+enum PaymentMethod { CBE BOA TELEBIRR MPESA }
+enum BalanceTxType { GIFT PAYMENT_CREDIT USAGE ADJUSTMENT REVERSAL }
+enum VideoStatus { DRAFT PUBLISHED ARCHIVED }
 
 model User {
   id           String   @id @default(cuid())
@@ -71,8 +29,9 @@ model User {
   updatedAt    DateTime @updatedAt
 
   student       Student?
-  auditLogs     AuditLog[]     @relation("Actor")
+  auditLogs     AuditLog[]              @relation("Actor")
   notifications Notification[]
+  requests      RegistrationRequest[]
 }
 
 model Student {
@@ -98,6 +57,7 @@ model Student {
 model RegistrationRequest {
   id            String @id @default(cuid())
   requestNumber String @unique
+  userId        String?
   fullName      String
   gender        Gender
   age           Int
@@ -133,6 +93,7 @@ model RegistrationRequest {
 
   program Program? @relation(fields: [programId], references: [id])
   student Student? @relation(fields: [studentId], references: [id])
+  user    User?    @relation(fields: [userId], references: [id])
 }
 
 model Program {
@@ -144,7 +105,6 @@ model Program {
   targetAudience String?
   isActive       Boolean @default(true)
   sortOrder      Int     @default(0)
-
   students       Student[]
   registrations  RegistrationRequest[]
 }
@@ -156,7 +116,6 @@ model Teacher {
   imageUrl        String?
   specializations String?
   isActive        Boolean @default(true)
-
   students        Student[]
   groups          GroupTeacher[]
 }
@@ -171,7 +130,6 @@ model Group {
   startTime  String?
   endTime    String?
   isActive   Boolean @default(true)
-
   students   Student[]
   teachers   GroupTeacher[]
 }
@@ -180,10 +138,8 @@ model GroupTeacher {
   id        String @id @default(cuid())
   groupId   String
   teacherId String
-
   group     Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
   teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-
   @@unique([groupId, teacherId])
 }
 
@@ -194,7 +150,6 @@ model Package {
   priceETB  Int
   isActive  Boolean @default(true)
   sortOrder Int     @default(0)
-
   payments  Payment[]
 }
 
@@ -207,15 +162,13 @@ model Payment {
   minutes         Int
   method          PaymentMethod
   status          PaymentStatus @default(PENDING)
-  receiptUrl      String?
-  rejectionReason String?
   idempotencyKey  String @unique
   reviewerId      String?
   reviewedAt      DateTime?
+  rejectionReason String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  // بيانات التحويل اليدوي الجديدة
   senderName      String?
   senderPhone     String?
   bankName        String?
@@ -238,7 +191,6 @@ model BalanceTransaction {
   createdById    String?
   idempotencyKey String @unique
   createdAt      DateTime @default(now())
-
   student Student  @relation(fields: [studentId], references: [id])
   payment Payment? @relation(fields: [paymentId], references: [id])
 }
@@ -291,7 +243,6 @@ model AuditLog {
   entityId  String?
   metadata  Json?
   createdAt DateTime @default(now())
-
   actor     User? @relation("Actor", fields: [actorId], references: [id])
 }
 
@@ -302,6 +253,5 @@ model Notification {
   message   String   @db.Text
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
-
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
