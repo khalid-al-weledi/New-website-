@@ -6,11 +6,11 @@ import { authOptions } from "@/lib/auth";
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user || (session.user as any).role !== 'SUPER_ADMIN') {
-      return NextResponse.json({ error: "غير مصرح لك باتخاذ هذا الإجراء" }, { status: 403 });
+    if (!session || (session.user as any).role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: "غير مصرح لك" }, { status: 403 });
     }
 
-    const { status } = await req.json();
+    const { status, reason } = await req.json();
 
     const request = await prisma.registrationRequest.findUnique({
       where: { id: params.id },
@@ -23,7 +23,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     if (status === 'REJECTED') {
       await prisma.registrationRequest.update({
         where: { id: params.id },
-        data: { status: 'REJECTED', reviewedAt: new Date(), reviewerId: session.user.id },
+        data: { 
+          status: 'REJECTED', 
+          reviewNotes: reason, // حفظ سبب الرفض
+          reviewedAt: new Date(), 
+          reviewerId: session.user.id 
+        },
       });
       return NextResponse.json({ ok: true });
     }
@@ -38,7 +43,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
               email: `student_${request.phone}@aljazari.local`,
               phone: request.phone,
               fullName: request.fullName,
-              passwordHash: "temp_hash",
+              passwordHash: "temp_hash", // هيتم تغييره لاحقاً
               role: "STUDENT",
             },
           });
@@ -49,11 +54,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             userId: user.id,
             studentNumber: `STD-${Date.now().toString().slice(-6)}`,
             programId: request.programId || null,
-            balanceMinutes: 30,
+            balanceMinutes: 30, // الهدية
             giftClaimedAt: new Date(),
           },
         });
 
+        // تسجيل الهدية في السجل المالي
         await tx.balanceTransaction.create({
           data: {
             studentId: student.id,
@@ -61,7 +67,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             minutesDelta: 30,
             balanceBefore: 0,
             balanceAfter: 30,
-            reason: "هدية الترحيب بالطالب الجديد (مرة واحدة)",
+            reason: "هدية ترحيبية بقبول الطالب (30 دقيقة)",
             idempotencyKey: `gift-${student.id}`,
           },
         });
