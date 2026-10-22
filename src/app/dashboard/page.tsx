@@ -10,13 +10,22 @@ export default async function StudentDashboard() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
 
+  const role = (session.user as any).role;
+  if (role === 'SUPER_ADMIN' || role === 'ADMIN') {
+    redirect("/admin");
+  }
+
   const student = await prisma.student.findFirst({
     where: { userId: session.user.id },
     include: { 
-      user: true, 
       registration: true,
       group: true,
-      balanceTxs: { orderBy: { createdAt: 'desc' }, take: 10 }
+      balanceTxs: { orderBy: { createdAt: 'desc' }, take: 10 },
+      user: {
+        include: {
+          notifications: { orderBy: { createdAt: 'desc' } }
+        }
+      }
     }
   });
 
@@ -26,7 +35,6 @@ export default async function StudentDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
-      {/* الهيدر */}
       <header className="bg-blue-950 text-white p-4 shadow-md sticky top-0 z-50">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <div className="font-bold text-yellow-500 text-lg">حسابي - مقرأة الإمام الجزري</div>
@@ -35,6 +43,25 @@ export default async function StudentDashboard() {
       </header>
 
       <main className="max-w-4xl mx-auto p-4 mt-6 space-y-6">
+        
+        {/* رسائل الإدارة */}
+        {student.user.notifications && student.user.notifications.length > 0 && (
+          <div className="bg-indigo-50 border-2 border-indigo-200 p-6 rounded-2xl shadow-sm mb-6">
+            <h3 className="text-xl font-bold text-indigo-900 mb-4 flex items-center gap-2">
+              <span>📬</span> الرسائل والتنبيهات
+            </h3>
+            <div className="space-y-3">
+              {student.user.notifications.map((notif: any) => (
+                <div key={notif.id} className="bg-white p-4 rounded-xl shadow-sm border border-indigo-100">
+                  <h4 className="font-bold text-indigo-800">{notif.title}</h4>
+                  <p className="text-gray-700 mt-1">{notif.message}</p>
+                  <p className="text-xs text-gray-400 mt-2">{new Date(notif.createdAt).toLocaleDateString('ar-ET')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* رسالة الترحيب */}
         {student.giftClaimedAt && (
           <div className="bg-green-50 border-2 border-green-200 p-6 rounded-2xl text-center shadow-sm">
@@ -44,7 +71,6 @@ export default async function StudentDashboard() {
           </div>
         )}
 
-        {/* البطاقات الأساسية */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center">
             <p className="text-gray-500 mb-1">رصيدي الحالي</p>
@@ -61,25 +87,22 @@ export default async function StudentDashboard() {
           </div>
         </div>
 
-        {/* بيانات الحساب */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <h3 className="text-lg font-bold text-blue-900 mb-4 border-b pb-2">تحديثات حسابي</h3>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div><span className="text-gray-500 block">الاسم:</span> <strong className="text-gray-800">{student.user.fullName}</strong></div>
             <div><span className="text-gray-500 block">رقم الهاتف:</span> <strong className="text-gray-800">{student.user.phone}</strong></div>
             <div><span className="text-gray-500 block">حالة الطلب:</span> <strong className="text-green-600">مقبول</strong></div>
-            <div><span className="text-gray-500 block">البرنامج:</span> <strong className="text-gray-800">{student.registration?.programId ? 'مسجل' : 'غير محدد'}</strong></div>
           </div>
         </div>
 
-        {/* سجل المعاملات */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <h3 className="text-lg font-bold text-blue-900 mb-4 border-b pb-2">سجل الرصيد والجلسات</h3>
           {student.balanceTxs.length === 0 ? (
             <p className="text-gray-500 text-center py-4">لا توجد حركات مالية حتى الآن.</p>
           ) : (
             <div className="space-y-3">
-              {student.balanceTxs.map((tx) => (
+              {student.balanceTxs.map((tx: any) => (
                 <div key={tx.id} className="flex justify-between items-center bg-gray-50 p-3 rounded-lg text-sm">
                   <div>
                     <p className="font-bold text-gray-800">{tx.reason}</p>
