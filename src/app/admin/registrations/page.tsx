@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { QuickActions } from "./QuickActions"; // استدعاء الزراير
 
 export default async function RegistrationsPage() {
   const session = await getServerSession(authOptions);
@@ -24,36 +25,41 @@ export default async function RegistrationsPage() {
         </nav>
       </aside>
 
-      <main className="flex-1 p-8">
-        <h1 className="text-3xl font-bold text-blue-900 mb-8">طلبات التسجيل</h1>
+      <main className="flex-1 p-4 md:p-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-blue-900 mb-8">طلبات التسجيل</h1>
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-right text-sm">
               <thead className="bg-gray-50 border-b border-gray-100 text-gray-500">
                 <tr>
                   <th className="p-4 font-medium">رقم الطلب</th>
-                  <th className="p-4 font-medium">الاسم (اضغط للمراجعة)</th>
+                  <th className="p-4 font-medium">الاسم (اضغط للتفاصيل)</th>
                   <th className="p-4 font-medium">الهاتف</th>
-                  <th className="p-4 font-medium">الحالة</th>
+                  <th className="p-4 font-medium text-center">الحالة</th>
+                  <th className="p-4 font-medium text-center">الإجراءات السريعة</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {requests.length === 0 ? (
-                  <tr><td colSpan={4} className="p-8 text-center text-gray-500">لا توجد طلبات حتى الآن.</td></tr>
+                  <tr><td colSpan={5} className="p-8 text-center text-gray-500">لا توجد طلبات حتى الآن.</td></tr>
                 ) : (
                   requests.map((req) => (
                     <tr key={req.id} className="hover:bg-gray-50/50">
                       <td className="p-4 font-mono text-xs">{req.requestNumber}</td>
                       <td className="p-4 font-medium">
-                        <Link href={`/admin/registrations/${req.id}`} className="text-blue-600 hover:underline hover:text-blue-800 font-bold block p-2 bg-blue-50 rounded">
-                          {req.fullName} (مراجعة الطلب ←)
+                        <Link href={`/admin/registrations/${req.id}`} className="text-blue-600 hover:underline">
+                          {req.fullName}
                         </Link>
                       </td>
                       <td className="p-4">{req.phone}</td>
-                      <td className="p-4">
+                      <td className="p-4 text-center">
                         <span className={`px-2 py-1 rounded-full text-xs font-bold ${req.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : req.status === 'APPROVED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                           {req.status === 'PENDING' ? 'قيد المراجعة' : req.status === 'APPROVED' ? 'مقبول' : 'مرفوض'}
                         </span>
+                      </td>
+                      <td className="p-4 text-center">
+                        {/* هنا بنستدعي الزراير */}
+                        <QuickActions requestId={req.id} status={req.status} />
                       </td>
                     </tr>
                   ))
