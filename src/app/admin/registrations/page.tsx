@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { QuickActions } from "./QuickActions"; // استدعاء الزراير
+import { QuickActions } from "./QuickActions";
 
 export default async function RegistrationsPage() {
   const session = await getServerSession(authOptions);
@@ -33,7 +33,7 @@ export default async function RegistrationsPage() {
               <thead className="bg-gray-50 border-b border-gray-100 text-gray-500">
                 <tr>
                   <th className="p-4 font-medium">رقم الطلب</th>
-                  <th className="p-4 font-medium">الاسم (اضغط للتفاصيل)</th>
+                  <th className="p-4 font-medium">الاسم (للتفاصيل)</th>
                   <th className="p-4 font-medium">الهاتف</th>
                   <th className="p-4 font-medium text-center">الحالة</th>
                   <th className="p-4 font-medium text-center">الإجراءات السريعة</th>
@@ -58,7 +58,6 @@ export default async function RegistrationsPage() {
                         </span>
                       </td>
                       <td className="p-4 text-center">
-                        {/* هنا بنستدعي الزراير */}
                         <QuickActions requestId={req.id} status={req.status} />
                       </td>
                     </tr>
