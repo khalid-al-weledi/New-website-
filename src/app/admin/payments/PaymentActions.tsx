@@ -7,15 +7,28 @@ export function PaymentActions({ paymentId }: { paymentId: string }) {
   const [loading, setLoading] = useState(false);
 
   const handleAction = async (action: 'approve' | 'reject') => {
-    if (!confirm(`هل أنت متأكد من ${action === 'approve' ? 'اعتماد' : 'رفض'} هذا الدفع؟`)) return;
+    let reason = "";
+    if (action === 'reject') {
+      const input = prompt("اكتب سبب رفض الدفع:");
+      if (input === null) return;
+      reason = input;
+    } else {
+      if (!confirm("هل أنت متأكد من اعتماد هذا الدفع؟ سيتم إضافة الدقائق للطالب.")) return;
+    }
+
     setLoading(true);
     const res = await fetch(`/api/admin/payments/${paymentId}`, {
       method: "POST",
-      body: JSON.stringify({ action }),
+      body: JSON.stringify({ action, reason }),
       headers: { "Content-Type": "application/json" },
     });
-    if (res.ok) { router.refresh(); alert("تم التحديث"); } 
-    else { const data = await res.json(); alert(data.error || "حدث خطأ"); }
+    
+    if (res.ok) {
+      router.refresh();
+      alert(action === 'approve' ? "تم الاعتماد وإضافة الدقائق." : "تم الرفض.");
+    } else {
+      alert("حدث خطأ");
+    }
     setLoading(false);
   };
 
