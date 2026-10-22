@@ -6,30 +6,36 @@ export const dynamic = 'force-dynamic';
 export default async function Home() {
   const programs = await prisma.program.findMany({ where: { isActive: true }, take: 4 });
 
-  // اسم اللوجو الطويل مع تحويل المسافات لـ %20 عشان المتصفح يقراه
-  const logoPath = "/image/Circular%20Logo%20for%20Al-Imam%20Al-Jazari.png";
-
   return (
     <main className="flex-1">
       {/* 1. القائمة العلوية */}
       <header className="sticky top-0 z-50 border-b border-blue-900/20 bg-[#0a1530]/95 backdrop-blur text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-            <img src={logoPath} alt="Logo" className="h-12 w-12 object-contain" />
+            <img src="/image/logo.png" alt="Logo" className="h-12 w-12 object-contain" />
             <div className="leading-tight">
               <div className="text-sm md:text-base font-bold text-yellow-500">مقرأة الإمام الجزري</div>
               <div className="text-[10px] md:text-xs text-gray-300">للإقراء والإجازة بالسند</div>
             </div>
           </div>
+          
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-200">
             <Link href="/" className="text-yellow-500">الرئيسية</Link>
-            <Link href="/#programs" className="hover:text-yellow-500">البرامج</Link>
-            <Link href="/packages" className="hover:text-yellow-500">الباقات</Link>
-            <Link href="/register" className="hover:text-yellow-500">التسجيل</Link>
-            <Link href="/login" className="hover:text-yellow-500">دخول الطلاب</Link>
+            <Link href="/#programs" className="hover:text-yellow-500 transition">البرامج</Link>
+            <Link href="/packages" className="hover:text-yellow-500 transition">الباقات</Link>
+            <Link href="/#about" className="hover:text-yellow-500 transition">عن المقرأة</Link>
           </nav>
-          <div className="flex items-center gap-2">
-            <Link href="/register" className="bg-yellow-500 text-blue-950 px-4 py-2 rounded-lg font-bold text-sm hover:bg-yellow-400 transition">سجل الآن</Link>
+
+          <div className="flex items-center gap-2 md:gap-3">
+            <Link href="/login" className="text-xs md:text-sm font-bold text-gray-200 hover:text-yellow-500 transition">
+              دخول الطلاب
+            </Link>
+            <Link href="/dashboard" className="hidden sm:block text-xs md:text-sm font-bold text-gray-200 hover:text-yellow-500 transition">
+              حسابي
+            </Link>
+            <Link href="/register" className="bg-yellow-500 text-blue-950 px-3 py-2 md:px-4 rounded-lg font-bold text-xs md:text-sm hover:bg-yellow-400 transition">
+              تسجيل جديد
+            </Link>
           </div>
         </div>
       </header>
@@ -43,11 +49,11 @@ export default async function Home() {
 
         <div className="relative mx-auto max-w-7xl px-4 py-24 md:py-32 text-center z-10">
           <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-yellow-500/10 border border-yellow-500/30 shadow-[0_0_30px_rgba(234,179,8,0.2)]">
-            <img src={logoPath} alt="Logo" className="h-16 w-16 object-contain" />
+            <img src="/image/logo.png" alt="Logo" className="h-16 w-16 object-contain" />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">مقرأة الإمام الجزري</h1>
           <p className="text-xl md:text-2xl text-yellow-500 font-medium mb-4">للإقراء والإجازة بالسند</p>
-          <p className="text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-gray-300 max-w-2xl mx-auto mb-10 leading-relaxed text-sm md:text-base">
             تعليم القرآن الكريم، وتصحيح التلاوة، والتجويد في بيئة تعليمية تجمع بين أصالة الإقراء والتقنيات الحديثة.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
@@ -86,7 +92,7 @@ export default async function Home() {
       </section>
 
       {/* 4. عن المقرأة (مع صورة الملازم) */}
-      <section className="bg-white py-20">
+      <section id="about" className="bg-white py-20">
         <div className="mx-auto max-w-7xl px-4 grid md:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="text-3xl font-bold text-blue-900 mb-6 flex items-center gap-3">
@@ -148,7 +154,7 @@ export default async function Home() {
             ))}
           </div>
           <div className="text-center mt-10">
-             <Link href="/programs" className="text-blue-900 font-bold border-b-2 border-yellow-500 pb-1 hover:text-yellow-600">عرض جميع البرامج</Link>
+             <Link href="/programs" className="text-blue-900 font-bold border-b-2 border-yellow-500 pb-1 hover:text-yellow-600 transition">عرض جميع البرامج</Link>
           </div>
         </div>
       </section>
@@ -158,7 +164,7 @@ export default async function Home() {
         <div className="mx-auto max-w-7xl px-4 grid md:grid-cols-3 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <img src={logoPath} alt="Logo" className="h-10 w-10 object-contain" />
+              <img src="/image/logo.png" alt="Logo" className="h-10 w-10 object-contain" />
               <span className="text-white font-bold">مقرأة الإمام الجزري</span>
             </div>
             <p className="text-sm">للإقراء والإجازة بالسند — عناية بالقرآن وروايته وأدائه.</p>
@@ -166,9 +172,9 @@ export default async function Home() {
           <div>
             <h4 className="text-white font-bold mb-4">روابط سريعة</h4>
             <ul className="space-y-2 text-sm">
-              <li><Link href="/" className="hover:text-yellow-500">الرئيسية</Link></li>
-              <li><Link href="/packages" className="hover:text-yellow-500">الباقات</Link></li>
-              <li><Link href="/register" className="hover:text-yellow-500">التسجيل</Link></li>
+              <li><Link href="/" className="hover:text-yellow-500 transition">الرئيسية</Link></li>
+              <li><Link href="/packages" className="hover:text-yellow-500 transition">الباقات</Link></li>
+              <li><Link href="/register" className="hover:text-yellow-500 transition">التسجيل</Link></li>
             </ul>
           </div>
           <div>
