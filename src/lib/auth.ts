@@ -10,27 +10,27 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "text" },
+        identifier: { label: "Phone/Code", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
+        if (!credentials?.identifier || !credentials?.password) return null;
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+        // البحث عن المستخدم برقم الهاتف أو الإيميل
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: credentials.identifier },
+              { phone: credentials.identifier },
+            ],
+          },
         });
 
-        if (!user || !user.passwordHash) {
-          return null;
-        }
+        if (!user || !user.passwordHash) return null;
 
+        // التحقق من كلمة المرور
         const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
-
-        if (!isValid) {
-          return null;
-        }
+        if (!isValid) return null;
 
         return { id: user.id, name: user.fullName, email: user.email, role: user.role };
       },
@@ -46,7 +46,5 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  pages: {
-    signIn: "/login",
-  },
+  pages: { signIn: "/login" },
 };
