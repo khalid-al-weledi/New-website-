@@ -3,16 +3,16 @@ import { useEffect, useState } from "react";
 import { LiveKitRoom, VideoConference, RoomAudioRenderer } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
 
 export default function LiveRoomPage() {
   const { data: session } = useSession();
   const [token, setToken] = useState("");
-  const [room, setRoom] = useState("default-room");
+  const [room, setRoom] = useState("");
 
   useEffect(() => {
-    // قراءة اسم الغرفة من الرابط
     const params = new URLSearchParams(window.location.search);
     const roomId = params.get("room") || "default-room";
     setRoom(roomId);
@@ -30,23 +30,23 @@ export default function LiveRoomPage() {
     })();
   }, [session]);
 
-  if (!session) return <div className="p-8 text-center text-red-600 font-bold">يجب تسجيل الدخول للانضمام للغرفة. <a href="/login" className="underline">اضغط هنا</a></div>;
-  if (!token) return <div className="p-8 text-center text-blue-900 font-bold">جاري تجهيز الغرفة الصوتية والمرئية...</div>;
+  if (!session) return <div className="p-8 text-center text-red-600 font-bold">يجب تسجيل الدخول للانضمام. <Link href="/login" className="underline">اضغط هنا</Link></div>;
+  if (!token) return <div className="p-8 text-center text-blue-900 font-bold">جاري تجهيز غرفة البث...</div>;
 
   return (
     <main className="min-h-screen bg-gray-900 p-4 flex flex-col items-center justify-center">
-      <h1 className="text-white text-2xl mb-6 font-bold">غرفة التسميع المباشر</h1>
+      <h1 className="text-white text-2xl mb-6 font-bold">غرفة البث المباشر</h1>
       <div className="w-full max-w-5xl h-[75vh] bg-white rounded-2xl shadow-lg overflow-hidden">
         <LiveKitRoom
-          video={true} // تفعيل الفيديو
-          audio={true}
+          video={true} // تفعيل الكاميرا
+          audio={true} // تفعيل المايك
           token={token}
           serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
           onDisconnected={() => setToken("")}
           data-lk-theme="default"
           className="h-full"
         >
-          <VideoConference /> {/* واجهة الفيديو */}
+          <VideoConference />
           <RoomAudioRenderer />
         </LiveKitRoom>
       </div>
