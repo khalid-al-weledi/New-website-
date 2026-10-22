@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function RegistrationsPage() {
+  const session = await getServerSession(authOptions);
+  if (!session) redirect("/login");
+
   const requests = await prisma.registrationRequest.findMany({
     orderBy: { createdAt: "desc" },
   });
@@ -14,7 +20,7 @@ export default async function RegistrationsPage() {
           <Link href="/admin" className="block p-2 hover:bg-blue-900 rounded-lg">الرئيسية</Link>
           <Link href="/admin/registrations" className="block p-2 bg-blue-900 rounded-lg">طلبات التسجيل</Link>
           <Link href="/admin/payments" className="block p-2 hover:bg-blue-900 rounded-lg">المدفوعات</Link>
-          <Link href="/admin/groups" className="block p-2 hover:bg-blue-900 rounded-lg">المجموعات والجداول</Link>
+          <Link href="/admin/groups" className="block p-2 hover:bg-blue-900 rounded-lg">المجموعات</Link>
         </nav>
       </aside>
 
@@ -38,16 +44,15 @@ export default async function RegistrationsPage() {
                   requests.map((req) => (
                     <tr key={req.id} className="hover:bg-gray-50/50">
                       <td className="p-4 font-mono text-xs">{req.requestNumber}</td>
-                      <td className="p-4 font-medium text-blue-900">
-                        {/* هنا اللينك اللي بيفتح صفحة القبول والرفض */}
-                        <Link href={`/admin/registrations/${req.id}`} className="hover:underline text-blue-600">
-                          {req.fullName}
+                      <td className="p-4 font-medium">
+                        <Link href={`/admin/registrations/${req.id}`} className="text-blue-600 hover:underline hover:text-blue-800 font-bold">
+                          {req.fullName} ← (اضغط هنا)
                         </Link>
                       </td>
                       <td className="p-4">{req.phone}</td>
                       <td className="p-4">
-                        <span className={`px-2 py-1 rounded-full text-xs ${req.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
-                          {req.status}
+                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${req.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : req.status === 'APPROVED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                          {req.status === 'PENDING' ? 'قيد المراجعة' : req.status === 'APPROVED' ? 'مقبول' : 'مرفوض'}
                         </span>
                       </td>
                     </tr>
