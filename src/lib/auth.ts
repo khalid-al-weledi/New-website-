@@ -1,52 +1,52 @@
-import type { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import bcrypt from 'bcryptjs';
-import { z } from 'zod';
-import { prisma } from './prisma';
-
-const loginSchema = z.object({
-  identifier: z.string().min(1),
-  password: z.string().min(1),
-});
+import { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
+import { prisma } from "./prisma";
 
 export const authOptions: NextAuthOptions = {
-  session: { strategy: 'jwt' },
-  pages: { signIn: '/login' },
+  session: { strategy: "jwt" },
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
-      name: 'credentials',
+      name: "Credentials",
       credentials: {
-        identifier: { label: 'Email or Phone', type: 'text' },
-        password: { label: 'Password', type: 'password' },
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const parsed = loginSchema.safeParse(credentials);
-        if (!parsed.success) return null;
-        const { identifier, password } = parsed.data;
-        const user = await prisma.user.findFirst({
-          where: { OR: [{ email: identifier }, { phone: identifier }], isActive: true },
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
         });
-        if (!user) return null;
-        const ok = await bcrypt.compare(password, user.passwordHash);
-        if (!ok) return null;
-        return { id: user.id, name: user.fullName, email: user.email, role: user.role } as any;
+
+        if (!user || !user.passwordHash) {
+          return null;
+        }
+
+        const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
+
+        if (!isValid) {
+          return null;
+        }
+
+        return { id: user.id, name: user.fullName, email: user.email, role: user.role };
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
-        token.uid = (user as any).id;
-        token.role = (user as any).role;
-      }
+      if (user) token.role = (user as any).role;
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        (session.user as any).id = token.uid;
-        (session.user as any).role = token.role;
-      }
+      if (session.user) (session.user as any).role = token.role;
       return session;
     },
+  },
+  pages: {
+    signIn: "/login",
   },
 };
