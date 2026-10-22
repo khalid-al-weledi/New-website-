@@ -69,8 +69,10 @@ model User {
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  student      Student?
-  auditLogs    AuditLog[] @relation("Actor")
+
+  student       Student?
+  auditLogs     AuditLog[] @relation("Actor")
+  notifications Notification[] // تم ربط جدول الإشعارات هنا
 }
 
 model Student {
@@ -83,13 +85,14 @@ model Student {
   groupId        String?
   giftClaimedAt  DateTime?
   createdAt      DateTime @default(now())
-  user           User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  program        Program? @relation(fields: [programId], references: [id])
-  teacher        Teacher? @relation(fields: [teacherId], references: [id])
-  group          Group?   @relation(fields: [groupId], references: [id])
-  payments       Payment[]
-  balanceTxs     BalanceTransaction[]
-  registration   RegistrationRequest?
+
+  user          User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program       Program? @relation(fields: [programId], references: [id])
+  teacher       Teacher? @relation(fields: [teacherId], references: [id])
+  group         Group?   @relation(fields: [groupId], references: [id])
+  payments      Payment[]
+  balanceTxs    BalanceTransaction[]
+  registration  RegistrationRequest?
 }
 
 model RegistrationRequest {
@@ -127,6 +130,7 @@ model RegistrationRequest {
   studentId             String? @unique
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+
   program Program? @relation(fields: [programId], references: [id])
   student Student? @relation(fields: [studentId], references: [id])
 }
@@ -140,6 +144,7 @@ model Program {
   targetAudience String?
   isActive       Boolean @default(true)
   sortOrder      Int     @default(0)
+
   students       Student[]
   registrations  RegistrationRequest[]
 }
@@ -151,6 +156,7 @@ model Teacher {
   imageUrl        String?
   specializations String?
   isActive        Boolean @default(true)
+
   students        Student[]
   groups          GroupTeacher[]
 }
@@ -165,6 +171,7 @@ model Group {
   startTime  String?
   endTime    String?
   isActive   Boolean @default(true)
+
   students   Student[]
   teachers   GroupTeacher[]
 }
@@ -173,8 +180,10 @@ model GroupTeacher {
   id        String @id @default(cuid())
   groupId   String
   teacherId String
+
   group     Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
   teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
   @@unique([groupId, teacherId])
 }
 
@@ -185,6 +194,7 @@ model Package {
   priceETB  Int
   isActive  Boolean @default(true)
   sortOrder Int     @default(0)
+
   payments  Payment[]
 }
 
@@ -204,6 +214,7 @@ model Payment {
   reviewedAt      DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
   student   Student  @relation(fields: [studentId], references: [id])
   package   Package  @relation(fields: [packageId], references: [id])
   balanceTx BalanceTransaction?
@@ -221,6 +232,7 @@ model BalanceTransaction {
   createdById    String?
   idempotencyKey String @unique
   createdAt      DateTime @default(now())
+
   student Student  @relation(fields: [studentId], references: [id])
   payment Payment? @relation(fields: [paymentId], references: [id])
 }
@@ -273,5 +285,17 @@ model AuditLog {
   entityId  String?
   metadata  Json?
   createdAt DateTime @default(now())
+
   actor     User? @relation("Actor", fields: [actorId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
