@@ -1,15 +1,16 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { approveRegistration, rejectRegistration } from "./actions";
 
 export function ReviewActions({ requestId, status }: { requestId: string; status: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  const handleAction = async (newStatus: 'APPROVED' | 'REJECTED') => {
+  const handleAction = async (action: 'APPROVED' | 'REJECTED') => {
     let reason = "";
     
-    if (newStatus === 'REJECTED') {
+    if (action === 'REJECTED') {
       const input = prompt("يرجى كتابة سبب الرفض (سيظهر للطالب):");
       if (input === null) return;
       if (!input.trim()) {
@@ -22,18 +23,17 @@ export function ReviewActions({ requestId, status }: { requestId: string; status
     }
 
     setLoading(true);
-    const res = await fetch(`/api/admin/registrations/${requestId}`, {
-      method: "POST",
-      body: JSON.stringify({ status: newStatus, reason }),
-      headers: { "Content-Type": "application/json" },
-    });
     
-    if (res.ok) {
-      router.refresh();
-      alert(newStatus === 'APPROVED' ? "تم القبول بنجاح، وتم إضافة 30 دقيقة للطالب." : "تم رفض الطلب.");
+    // استدعاء السيرفر أكشن مباشرة
+    const res = action === 'APPROVED' 
+      ? await approveRegistration(requestId)
+      : await rejectRegistration(requestId, reason);
+
+    if (res.error) {
+      alert(res.error);
     } else {
-      const data = await res.json();
-      alert(data.error || "حدث خطأ");
+      alert(action === 'APPROVED' ? "تم القبول بنجاح، وتم إضافة 30 دقيقة للطالب." : "تم رفض الطلب.");
+      router.refresh();
     }
     setLoading(false);
   };
