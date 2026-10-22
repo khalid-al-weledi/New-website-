@@ -29,7 +29,6 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
 
     if (status === 'APPROVED') {
-      // تشفير رقم الهاتف ليكون كلمة المرور الافتراضية
       const defaultPassword = await bcrypt.hash(request.phone, 10);
 
       await prisma.$transaction(async (tx) => {
@@ -41,13 +40,12 @@ export async function POST(req: Request, { params }: { params: { id: string } })
               email: `student_${request.phone}@aljazari.local`,
               phone: request.phone,
               fullName: request.fullName,
-              passwordHash: defaultPassword, // الباسورد = رقم الهاتف
+              passwordHash: defaultPassword,
               role: "STUDENT",
             },
           });
         }
 
-        // إنشاء رقم تسلسلي فريد للطالب
         const studentNumber = `STD-${Date.now().toString().slice(-6)}`;
 
         const student = await tx.student.create({
