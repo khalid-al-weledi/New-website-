@@ -3,7 +3,7 @@ import { AccessToken } from "livekit-server-sdk";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-export const dynamic = 'force-dynamic'; // السطر ده مهم جداً عشان البناء
+export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
   try {
