@@ -71,8 +71,8 @@ model User {
   updatedAt    DateTime @updatedAt
 
   student       Student?
-  auditLogs     AuditLog[] @relation("Actor")
-  notifications Notification[] // تم ربط جدول الإشعارات هنا
+  auditLogs     AuditLog[]     @relation("Actor")
+  notifications Notification[]
 }
 
 model Student {
@@ -86,13 +86,13 @@ model Student {
   giftClaimedAt  DateTime?
   createdAt      DateTime @default(now())
 
-  user          User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  program       Program? @relation(fields: [programId], references: [id])
-  teacher       Teacher? @relation(fields: [teacherId], references: [id])
-  group         Group?   @relation(fields: [groupId], references: [id])
-  payments      Payment[]
-  balanceTxs    BalanceTransaction[]
-  registration  RegistrationRequest?
+  user         User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  program      Program?              @relation(fields: [programId], references: [id])
+  teacher      Teacher?              @relation(fields: [teacherId], references: [id])
+  group        Group?                @relation(fields: [groupId], references: [id])
+  payments     Payment[]
+  balanceTxs   BalanceTransaction[]
+  registration RegistrationRequest?
 }
 
 model RegistrationRequest {
@@ -214,6 +214,12 @@ model Payment {
   reviewedAt      DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  // بيانات التحويل اليدوي الجديدة
+  senderName      String?
+  senderPhone     String?
+  bankName        String?
+  transactionId   String?
 
   student   Student  @relation(fields: [studentId], references: [id])
   package   Package  @relation(fields: [packageId], references: [id])
