@@ -10,13 +10,12 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        identifier: { label: "Phone/Code", type: "text" },
+        identifier: { label: "Phone/Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.identifier || !credentials?.password) return null;
 
-        // البحث عن المستخدم برقم الهاتف أو الإيميل
         const user = await prisma.user.findFirst({
           where: {
             OR: [
@@ -28,7 +27,6 @@ export const authOptions: NextAuthOptions = {
 
         if (!user || !user.passwordHash) return null;
 
-        // التحقق من كلمة المرور
         const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
         if (!isValid) return null;
 
