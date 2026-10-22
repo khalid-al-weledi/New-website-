@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import bcrypt from "bcryptjs";
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -11,29 +14,24 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     }
 
     const { status, reason } = await req.json();
-
-    const request = await prisma.registrationRequest.findUnique({
-      where: { id: params.id },
-    });
+    const request = await prisma.registrationRequest.findUnique({ where: { id: params.id } });
 
     if (!request || request.status !== 'PENDING') {
-      return NextResponse.json({ error: "الطلب غير موجود أو تمت معالجته مسبقاً" }, { status: 400 });
+      return NextResponse.json({ error: "الطلب غير موجود أو تمت معالجته" }, { status: 400 });
     }
 
     if (status === 'REJECTED') {
       await prisma.registrationRequest.update({
         where: { id: params.id },
-        data: { 
-          status: 'REJECTED', 
-          reviewNotes: reason, // حفظ سبب الرفض
-          reviewedAt: new Date(), 
-          reviewerId: session.user.id 
-        },
+        data: { status: 'REJECTED', reviewNotes: reason, reviewedAt: new Date(), reviewerId: session.user.id },
       });
       return NextResponse.json({ ok: true });
     }
 
     if (status === 'APPROVED') {
+      // تشفير رقم الهاتف ليكون كلمة المرور الافتراضية
+      const defaultPassword = await bcrypt.hash(request.phone, 10);
+
       await prisma.$transaction(async (tx) => {
         let user = await tx.user.findFirst({ where: { phone: request.phone } });
         
@@ -43,23 +41,25 @@ export async function POST(req: Request, { params }: { params: { id: string } })
               email: `student_${request.phone}@aljazari.local`,
               phone: request.phone,
               fullName: request.fullName,
-              passwordHash: "temp_hash", // هيتم تغييره لاحقاً
+              passwordHash: defaultPassword, // الباسورد = رقم الهاتف
               role: "STUDENT",
             },
           });
         }
 
+        // إنشاء رقم تسلسلي فريد للطالب
+        const studentNumber = `STD-${Date.now().toString().slice(-6)}`;
+
         const student = await tx.student.create({
           data: {
             userId: user.id,
-            studentNumber: `STD-${Date.now().toString().slice(-6)}`,
+            studentNumber: studentNumber,
             programId: request.programId || null,
-            balanceMinutes: 30, // الهدية
+            balanceMinutes: 30,
             giftClaimedAt: new Date(),
           },
         });
 
-        // تسجيل الهدية في السجل المالي
         await tx.balanceTransaction.create({
           data: {
             studentId: student.id,
