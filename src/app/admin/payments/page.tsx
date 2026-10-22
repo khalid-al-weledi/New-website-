@@ -2,13 +2,12 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PaymentActions } from "./PaymentActions";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminPaymentsPage() {
   const payments = await prisma.payment.findMany({
     orderBy: { createdAt: "desc" },
-    include: {
-      student: { include: { user: true } },
-      package: true,
-    },
+    include: { student: { include: { user: true } }, package: true },
   });
 
   return (
@@ -22,8 +21,8 @@ export default async function AdminPaymentsPage() {
         </nav>
       </aside>
 
-      <main className="flex-1 p-8">
-        <h1 className="text-3xl font-bold text-blue-900 mb-8">سجل المدفوعات</h1>
+      <main className="flex-1 p-4 md:p-8">
+        <h1 className="text-2xl font-bold text-blue-900 mb-8">سجل المدفوعات</h1>
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-right text-sm">
@@ -31,26 +30,33 @@ export default async function AdminPaymentsPage() {
                 <tr>
                   <th className="p-4 font-medium">رقم العملية</th>
                   <th className="p-4 font-medium">الطالب</th>
-                  <th className="p-4 font-medium">الباقة</th>
                   <th className="p-4 font-medium">المبلغ</th>
-                  <th className="p-4 font-medium">الإيصال</th>
+                  <th className="p-4 font-medium">بيانات المرسل (للمطابقة)</th>
                   <th className="p-4 font-medium">الحالة</th>
                   <th className="p-4 font-medium">إجراء</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {payments.length === 0 ? (
-                  <tr><td colSpan={7} className="p-8 text-center text-gray-500">لا توجد مدفوعات.</td></tr>
+                  <tr><td colSpan={6} className="p-8 text-center text-gray-500">لا توجد مدفوعات.</td></tr>
                 ) : (
                   payments.map((pay) => (
                     <tr key={pay.id} className="hover:bg-gray-50/50">
                       <td className="p-4 font-mono text-xs">{pay.paymentNumber}</td>
-                      <td className="p-4 font-medium text-blue-900">{pay.student.user.fullName}</td>
-                      <td className="p-4">{pay.minutes} دقيقة</td>
+                      <td className="p-4 font-bold text-blue-900">{pay.student.user.fullName}</td>
                       <td className="p-4 font-bold text-yellow-600">{pay.amountETB} بر</td>
-                      <td className="p-4">{pay.receiptUrl ? <a href={pay.receiptUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">عرض</a> : 'لا يوجد'}</td>
-                      <td className="p-4"><span className={`px-2 py-1 rounded-full text-xs ${pay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : pay.status === 'APPROVED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{pay.status === 'PENDING' ? 'قيد المراجعة' : pay.status === 'APPROVED' ? 'معتمد' : 'مرفوض'}</span></td>
-                      <td className="p-4">{pay.status === 'PENDING' && <PaymentActions paymentId={pay.id} />}</td>
+                      <td className="p-4 text-xs space-y-1">
+                        <p><strong>الاسم:</strong> {pay.senderName || '-'}</p>
+                        <p><strong>رقم العملية:</strong> <span className="font-mono bg-gray-100 px-1">{pay.transactionId || '-'}</span></p>
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${pay.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : pay.status === 'APPROVED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                          {pay.status === 'PENDING' ? 'قيد المراجعة' : pay.status === 'APPROVED' ? 'معتمد' : 'مرفوض'}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        {pay.status === 'PENDING' && <PaymentActions paymentId={pay.id} />}
+                      </td>
                     </tr>
                   ))
                 )}
