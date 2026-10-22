@@ -19,8 +19,8 @@ export default async function RegistrationsPage() {
         <nav className="space-y-2">
           <Link href="/admin" className="block p-2 hover:bg-blue-900 rounded-lg">الرئيسية</Link>
           <Link href="/admin/registrations" className="block p-2 bg-blue-900 rounded-lg">طلبات التسجيل</Link>
+          <Link href="/admin/students" className="block p-2 hover:bg-blue-900 rounded-lg">قائمة الطلاب</Link>
           <Link href="/admin/payments" className="block p-2 hover:bg-blue-900 rounded-lg">المدفوعات</Link>
-          <Link href="/admin/groups" className="block p-2 hover:bg-blue-900 rounded-lg">المجموعات</Link>
         </nav>
       </aside>
 
@@ -45,8 +45,8 @@ export default async function RegistrationsPage() {
                     <tr key={req.id} className="hover:bg-gray-50/50">
                       <td className="p-4 font-mono text-xs">{req.requestNumber}</td>
                       <td className="p-4 font-medium">
-                        <Link href={`/admin/registrations/${req.id}`} className="text-blue-600 hover:underline hover:text-blue-800 font-bold">
-                          {req.fullName} ← (اضغط هنا)
+                        <Link href={`/admin/registrations/${req.id}`} className="text-blue-600 hover:underline hover:text-blue-800 font-bold block p-2 bg-blue-50 rounded">
+                          {req.fullName} (مراجعة الطلب ←)
                         </Link>
                       </td>
                       <td className="p-4">{req.phone}</td>
