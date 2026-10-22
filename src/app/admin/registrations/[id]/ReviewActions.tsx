@@ -6,19 +6,32 @@ export function ReviewActions({ requestId, status }: { requestId: string; status
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  const handleAction = async (newStatus: string) => {
-    if (!confirm(`هل أنت متأكد من تغيير الحالة إلى ${newStatus === 'APPROVED' ? 'قبول' : 'رفض'}؟`)) return;
-    setLoading(true);
+  const handleAction = async (newStatus: 'APPROVED' | 'REJECTED') => {
+    let reason = "";
     
+    // لو بيرفض، نطلب منه يكتب السبب
+    if (newStatus === 'REJECTED') {
+      const input = prompt("يرجى كتابة سبب الرفض (سيظهر للطالب):");
+      if (input === null) return; // لو ضغط Cancel
+      if (!input.trim()) {
+        alert("يجب كتابة سبب الرفض!");
+        return;
+      }
+      reason = input;
+    } else {
+      if (!confirm("هل أنت متأكد من قبول الطالب؟ سيتم إنشاء حساب له وإضافة 30 دقيقة هدية.")) return;
+    }
+
+    setLoading(true);
     const res = await fetch(`/api/admin/registrations/${requestId}`, {
       method: "POST",
-      body: JSON.stringify({ status: newStatus }),
+      body: JSON.stringify({ status: newStatus, reason }),
       headers: { "Content-Type": "application/json" },
     });
     
     if (res.ok) {
-      router.refresh(); // تحديث الصفحة لإظهار الحالة الجديدة
-      alert("تم التحديث بنجاح");
+      router.refresh();
+      alert(newStatus === 'APPROVED' ? "تم القبول بنجاح، وتم إضافة 30 دقيقة للطالب." : "تم رفض الطلب.");
     } else {
       const data = await res.json();
       alert(data.error || "حدث خطأ");
@@ -27,15 +40,15 @@ export function ReviewActions({ requestId, status }: { requestId: string; status
   };
 
   if (status !== 'PENDING') {
-    return <div className="text-green-600 font-bold p-4 bg-green-50 rounded-lg">تمت معالجة هذا الطلب مسبقاً (الحالة: {status})</div>;
+    return <div className="text-gray-600 font-bold p-4 bg-gray-50 rounded-lg">تمت معالجة هذا الطلب مسبقاً (الحالة: {status === 'APPROVED' ? 'مقبول' : 'مرفوض'})</div>;
   }
 
   return (
-    <div className="flex gap-2 mt-4">
-      <button disabled={loading} onClick={() => handleAction('APPROVED')} className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 font-bold">
-        {loading ? "جاري المعالجة..." : "قبول الطالب (وإنشاء الحساب)"}
+    <div className="flex gap-4 mt-6">
+      <button disabled={loading} onClick={() => handleAction('APPROVED')} className="bg-green-600 text-white px-8 py-3 rounded-xl hover:bg-green-700 disabled:opacity-50 font-bold text-lg flex-1 shadow-md">
+        {loading ? "جاري المعالجة..." : "قبول الطالب (وإضافة 30 دقيقة)"}
       </button>
-      <button disabled={loading} onClick={() => handleAction('REJECTED')} className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 disabled:opacity-50 font-bold">
+      <button disabled={loading} onClick={() => handleAction('REJECTED')} className="bg-red-600 text-white px-8 py-3 rounded-xl hover:bg-red-700 disabled:opacity-50 font-bold text-lg flex-1 shadow-md">
         رفض الطلب
       </button>
     </div>
