@@ -1,19 +1,26 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
 
 export default async function GroupsPage() {
-  // جلب المجموعات مع الطلاب المسجلين فيها
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user as any).role !== 'SUPER_ADMIN') redirect("/login");
+
+  // جلب المجموعات مع الطلاب
   const groups = await prisma.group.findMany({
     include: {
       students: { include: { user: true } }
-    }
+    },
+    orderBy: { name: 'asc' }
   });
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold text-blue-900 mb-6">مجموعات الطلاب والغرف الصوتية</h1>
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
+      <h1 className="text-2xl font-bold text-blue-900 mb-6">المجموعات والغرف الصوتية</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {groups.map((group) => (
@@ -33,7 +40,7 @@ export default async function GroupsPage() {
                 <h4 className="font-bold text-gray-700 text-sm mb-2">الطلاب ({group.students.length}):</h4>
                 <ul className="space-y-2 max-h-40 overflow-y-auto">
                   {group.students.length === 0 ? (
-                    <li className="text-xs text-gray-400">لا يوجد طلاب في هذه المجموعة بعد.</li>
+                    <li className="text-xs text-gray-400">لا يوجد طلاب.</li>
                   ) : (
                     group.students.map(student => (
                       <li key={student.id} className="text-sm bg-blue-50 px-3 py-2 rounded-lg flex justify-between">
@@ -46,12 +53,12 @@ export default async function GroupsPage() {
               </div>
             </div>
 
-            {/* زر دخول الغرفة الصوتية/المرئية الخاصة بالمجموعة */}
+            {/* زر دخول المشرف للغرفة */}
             <Link 
               href={`/live?room=${group.id}`} 
               className="w-full block text-center bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition"
             >
-              دخول الغرفة الصوتية/المرئية 🎙️
+              دخول غرفة البث 🎙️
             </Link>
           </div>
         ))}
