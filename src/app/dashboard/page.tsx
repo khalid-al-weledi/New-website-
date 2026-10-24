@@ -17,12 +17,9 @@ export default async function StudentDashboard() {
       student: {
         include: {
           registration: true,
-          group: true,
-          program: true,
           balanceTxs: { orderBy: { createdAt: 'desc' }, take: 10 }
         }
-      },
-      notifications: { orderBy: { createdAt: 'desc' } }
+      }
     }
   });
 
@@ -36,16 +33,30 @@ export default async function StudentDashboard() {
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center max-w-md w-full">
           <div className="text-6xl mb-4">⏳</div>
           <h1 className="text-2xl font-bold text-blue-900 mb-2">طلبك قيد المراجعة</h1>
-          <p className="text-gray-600 mb-6 leading-relaxed">أهلاً بك يا {user.fullName}. طلبك قيد المراجعة. نسأل الله أن يوفقك.</p>
+          <p className="text-gray-600 mb-6">أهلاً بك يا {user.fullName}. طلبك قيد المراجعة. نسأل الله أن يوفقك.</p>
           <div className="bg-blue-50 text-blue-800 p-3 rounded-lg text-sm mb-6">رقم طلبك: <strong>{request.requestNumber}</strong></div>
-          <Link href="/" className="text-blue-600 hover:underline text-sm font-bold">العودة للرئيسية</Link>
         </div>
       </div>
     );
   }
 
   const student = user.student;
-  if (!student) return <div className="p-10 text-center text-red-600 font-bold">جاري تجهيز الملف...</div>;
+  if (!student || !student.registration) return <div className="p-10 text-center text-red-600 font-bold">جاري تجهيز الملف...</div>;
+
+  // توليد اسم الغرفة تلقائياً للطالب بناءً على الجنس والفترة
+  const reg = student.registration;
+  let roomId = "";
+  const isMale = reg.gender === 'MALE';
+  const isMorning = reg.preferredTimeSlots?.includes('صباحية');
+  const isEvening = reg.preferredTimeSlots?.includes('مسائية');
+  const isNight = reg.preferredTimeSlots?.includes('ليلية');
+
+  if (isMale && isMorning) roomId = "room-male-morning";
+  if (isMale && isEvening) roomId = "room-male-evening";
+  if (isMale && isNight) roomId = "room-male-night";
+  if (!isMale && isMorning) roomId = "room-female-morning";
+  if (!isMale && isEvening) roomId = "room-female-evening";
+  if (!isMale && isNight) roomId = "room-female-night";
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
@@ -68,14 +79,6 @@ export default async function StudentDashboard() {
           </Link>
         </div>
 
-        {student.giftClaimedAt && (
-          <div className="bg-green-50 border-2 border-green-200 p-6 rounded-2xl text-center shadow-sm">
-            <h2 className="text-2xl font-bold text-green-800 mb-2">🎉 بشرى سارة! 🎉</h2>
-            <p className="text-lg text-green-700">تم قبولك في مقرأة الإمام الجزري.</p>
-            <p className="text-green-700 mt-2 font-bold text-xl">تمت إضافة 30 دقيقة هدية ترحيبية إلى رصيدك!</p>
-          </div>
-        )}
-
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center">
             <p className="text-gray-500 mb-1">رصيدي الحالي</p>
@@ -91,48 +94,31 @@ export default async function StudentDashboard() {
           </div>
         </div>
 
-        {/* المجموعة والفترة الدراسية والغرفة الصوتية */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h3 className="text-lg font-bold text-blue-900 mb-4 border-b pb-2">مجموعتي وفترة دروسي</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-              <span className="text-blue-600 block text-sm mb-1">الفترة المختارة</span>
-              <strong className="text-lg text-blue-900">{student.registration?.preferredTimeSlots || 'غير محدد'}</strong>
+        {/* غرفة البث الخاصة بالطالب */}
+        <div className="bg-white rounded-2xl shadow-sm border-2 border-green-100 p-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 bg-green-500 text-white text-xs px-3 py-1 rounded-bl-lg font-bold">مباشر الآن</div>
+          <h3 className="text-xl font-bold text-blue-900 mb-2">غرفة التسميع (البث المباشر)</h3>
+          <p className="text-gray-600 mb-6 text-sm">بناءً على تسجيلك، الفترة الخاصة بك هي: <strong className="text-blue-800">{reg.preferredTimeSlots}</strong>. يمكنك الانضمام للغرفة الآن للاستماع والتسميع للشيخ.</p>
+          
+          {roomId ? (
+            <Link href={`/live?room=${roomId}`} className="inline-flex items-center gap-2 bg-green-600 text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-green-700 transition shadow-md w-full md:w-auto justify-center">
+              <span>🎙️</span> دخول غرفة البث المباشر
+            </Link>
+          ) : (
+            <div className="bg-red-50 text-red-600 p-4 rounded-xl text-center font-bold text-sm">
+              لم نتمكن من تحديد الغرفة. يرجى التواصل مع الإدارة.
             </div>
-            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-              <span className="text-blue-600 block text-sm mb-1">أيام الحضور</span>
-              <strong className="text-lg text-blue-900">{student.registration?.preferredDays || 'غير محدد'}</strong>
-            </div>
-            
-            {student.group ? (
-              <div className="md:col-span-2 bg-green-50 p-4 rounded-xl border border-green-100 flex flex-col md:flex-row justify-between items-center gap-4 mt-2">
-                <div>
-                  <span className="text-green-700 block text-sm mb-1">تم تعيينك في المجموعة:</span>
-                  <strong className="text-lg text-green-900">{student.group.name}</strong>
-                  <span className="text-sm text-green-700 block mt-1">({student.group.startTime} - {student.group.endTime})</span>
-                </div>
-                {/* زر دخول الطالب للغرفة الصوتية الخاصة بمجموعته */}
-                <Link href={`/live?room=${student.group.id}`} className="bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-green-700 transition shadow-md whitespace-nowrap">
-                  دخول غرفة التسميع 🎙️
-                </Link>
-              </div>
-            ) : (
-              <div className="md:col-span-2 bg-yellow-50 text-yellow-800 p-4 rounded-xl border border-yellow-200 text-center mt-2 text-sm">
-                لم يتم تعيينك في مجموعة بعد. يرجى التواصل مع الإدارة لتحديد موعدك.
-              </div>
-            )}
-          </div>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <h3 className="text-lg font-bold text-blue-900 mb-4 border-b pb-2">بياناتي الشخصية</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
             <div><span className="text-gray-500 block">الاسم:</span> <strong className="text-gray-800">{user.fullName}</strong></div>
-            <div><span className="text-gray-500 block">العمر:</span> <strong className="text-gray-800">{student.registration?.age} سنة</strong></div>
+            <div><span className="text-gray-500 block">العمر:</span> <strong className="text-gray-800">{reg.age} سنة</strong></div>
             <div><span className="text-gray-500 block">الهاتف:</span> <strong className="text-gray-800">{user.phone}</strong></div>
-            <div><span className="text-gray-500 block">البلد:</span> <strong className="text-gray-800">{student.registration?.country}</strong></div>
-            <div><span className="text-gray-500 block">المدينة:</span> <strong className="text-gray-800">{student.registration?.city}</strong></div>
-            <div><span className="text-gray-500 block">الجنس:</span> <strong className="text-gray-800">{student.registration?.gender === 'MALE' ? 'ذكر' : 'أنثى'}</strong></div>
+            <div><span className="text-gray-500 block">البلد:</span> <strong className="text-gray-800">{reg.country}</strong></div>
+            <div><span className="text-gray-500 block">المدينة:</span> <strong className="text-gray-800">{reg.city}</strong></div>
           </div>
         </div>
 
